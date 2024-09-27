@@ -1,118 +1,111 @@
-## README File for Text-to-Speech Learning Project
+## README
 
-### Project Description
+### Описание Проекта
 
-#### Русский
-Этот проект предназначен для создания интерактивной учебной программы, которая помогает пользователям学习 и запоминать слова из файла используя текст-to-speech технологию. Программа читает слова из файла, а пользователь должен повторить их. Программа проверяет правильность ответов и предоставляет обратную связь.
+Этот проект представляет собой интерактивную программу для проверки слов с помощью текста, преобразованного в речь используя библиотеку `pyttsx3`. Программа позволяет пользователю загрузить файл с текстом, после чего она случайным образом выбирает слова из файла и просит пользователя их повторить. Программа проверяет ввод пользователя и предоставляет обратную связь через голосовые сообщения и визуальные указания.
 
-#### English
-This project is designed to create an interactive learning program that helps users learn and memorize words from a file using text-to-speech technology. The program reads words from a file, and the user must repeat them. The program checks the correctness of the answers and provides feedback.
+### Установка
 
-### Installation
+Чтобы запустить этот проект, вам необходимо установить следующие библиотеки:
 
-#### Русский
-Чтобы запустить этот проект, вам необходимо установить библиотеку `pyttsx3`. Вы можете сделать это используя следующую команду в терминале:
+- `pyttsx3` для текста к речи
+- `PySimpleGUI` для графического интерфейса
 
-```bash
-pip install pyttsx3
-```
-
-Если出现 ошибки установки, убедитесь, что вы обновили версию `wheel`:
+Установите эти библиотеки используя pip:
 
 ```bash
-pip install --upgrade wheel
+pip install pyttsx3 PySimpleGUI
 ```
 
-#### English
-To run this project, you need to install the `pyttsx3` library. You can do this using the following command in the terminal:
-
-```bash
-pip install pyttsx3
-```
-
-If you encounter installation errors, ensure you have upgraded your `wheel` version:
+Если во время установки  ошибки, убедитесь, что ваша версия `wheel` обновлена:
 
 ```bash
 pip install --upgrade wheel
 ```
 
-### Usage
-
-#### Русский
-1. **Ввод пути к файлу**: Программа запрашивает путь к файлу, содержащему слова для обучения.
-2. **Ввод разделителя**: Программа запрашивает тип разделителя, используемого в файле для разделения слов.
-3. **Чтение и проверка**: Программа читает слова из файла, а пользователь должен повторить каждое слово. Программа проверяет правильность ответов и предоставляет обратную связь.
-
-#### English
-1. **File Path Input**: The program prompts for the path to the file containing the words for learning.
-2. **Delimiter Input**: The program prompts for the type of delimiter used in the file to separate the words.
-3. **Reading and Checking**: The program reads the words from the file, and the user must repeat each word. The program checks the correctness of the answers and provides feedback.
-
-### Code Explanation
-
-```python
-import pyttsx3
-import time
-
-# Input path to the file and type of delimiter
-path = str(input('Input path to your file: ').strip())
-type_of_spliter = str(input('Type of spliter: ').strip())
-
-try:
-    # Read the file and split the content into words
-    with open(path, encoding='utf-8') as file:
-        words = []
-        lst = [line.strip() for line in file if line != ' ']
-        for i in range(len(lst)):
-            if len(lst[i]) > 1:
-                for i in lst[i].replace("'", '').strip().split(type_of_spliter):
-                    words.append(i)
-except:
-    print('file not found, try again')
-    exit()
-
-errors = []
-engine = pyttsx3.init()
-
-# Iterate through the words, speak them, and check user input
-for i in range(len(words)):
-    engine.say(words[i])
-    engine.runAndWait()
-    time.sleep(2)
-    inp = str(input()).strip()
-    if inp == words[i]:
-        print('Correct!')
-    elif inp == 'след':  # Skip to the next word
-        continue
-    else:
-        engine.say('Неправильно!')
-        time.sleep(1)
-        engine.runAndWait()
-        print('Incorrect!')
-        print(f'The correct word is: {words[i].strip()}')
-        errors.append(words[i])
-
-# Print the list of incorrect words
-for i in errors:
-    print(i)
-```
-
-### Features
-
-- **Offline Text-to-Speech**: Программа работает без подключения к интернету.
-- **Interactive Learning**: Пользователь взаимодействует с программой, повторяя слова и получая обратную связь.
-- **Customizable**: Пользователь может выбрать тип разделителя и путь к файлу.
-
-### Supported Platforms
-
-- **Windows**: Использует SAPI5.
-- **Mac OS X**: Использует NSSpeechSynthesizer.
-- **Linux**: Использует eSpeak.
-
-### Additional Requirements for Linux
-
-Если на Linux голосовой вывод не работает, необходимо установить следующие пакеты:
+Для систем Linux, если голосовой вывод не работает, установите следующие пакеты:
 
 ```bash
 sudo apt update && sudo apt install espeak ffmpeg libespeak1
 ```
+
+### Использование
+
+1. **Загрузка Файла**:
+   - Программа запросит путь к файлу с текстом.
+   - Файл должен быть в кодировке UTF-8.
+
+2. **Проверка Слов**:
+   - Программа случайным образом выбирает слова из файла и просит пользователя их повторить.
+   - Пользователь может использовать команды:
+     - `след` - пропустить текущее слово.
+     - `остановить` - выйти из программы.
+
+3. **Обратная Связь**:
+   - Программа дает голосовую и визуальную обратную связь о правильности введенного слова.
+   - Ошибочные слова отображаются в отдельном поле.
+
+### Код
+
+Код состоит из нескольких функций:
+- `delete_bad_signes_from_words`: Удаляет ненужные символы из слов.
+- `reading_file`: Читает файл и возвращает список слов.
+- `Input_processing`: Обрабатывает ввод пользователя и дает обратную связь.
+- `main`: Основная функция, управляющая графическим интерфейсом и логикой программы.
+
+### Английская Версия
+
+## README
+
+### Project Description
+
+This project is an interactive program for word checking using text-to-speech conversion with the `pyttsx3` library. The program allows the user to load a text file, then randomly selects words from the file and asks the user to repeat them. The program checks the user's input and provides feedback through voice messages and visual indications.
+
+### Installation
+
+To run this project, you need to install the following libraries:
+
+- `pyttsx3` for text-to-speech
+- `PySimpleGUI` for the graphical interface
+
+Install these libraries using pip:
+
+```bash
+pip install pyttsx3 PySimpleGUI
+```
+
+If you encounter installation errors, ensure your `wheel` version is updated:
+
+```bash
+pip install --upgrade wheel
+```
+
+For Linux systems, if voice output does not work, install the following packages:
+
+```bash
+sudo apt update && sudo apt install espeak ffmpeg libespeak1
+```
+
+### Usage
+
+1. **File Loading**:
+   - The program will prompt for the path to a text file.
+   - The file should be in UTF-8 encoding.
+
+2. **Word Checking**:
+   - The program randomly selects words from the file and asks the user to repeat them.
+   - The user can use the following commands:
+     - `next` - skip the current word.
+     - `stop` - exit the program.
+
+3. **Feedback**:
+   - The program provides voice and visual feedback on the correctness of the entered word.
+   - Incorrect words are displayed in a separate field.
+
+### Code
+
+The code consists of several functions:
+- `delete_bad_signes_from_words`: Removes unnecessary characters from words.
+- `reading_file`: Reads the file and returns a list of words.
+- `Input_processing`: Processes the user's input and provides feedback.
+- `main`: The main function that manages the graphical interface and program logic.
