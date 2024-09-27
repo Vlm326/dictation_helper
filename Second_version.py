@@ -1,60 +1,86 @@
-import pyttsx3 
-import time
+import pyttsx3
 import PySimpleGUI as sg
-import random as rn
-import string
-
+import random
+import re
 
 engine = pyttsx3.init()
+
 def delete_bad_signes_from_words(word: str) -> str:
-    for i in str(string.punctuation()):
-        word = word.replace(i, '')
-    return word
+    return re.sub(r'[^\w\s]', '', word)
 
-def reading_file() -> None:
-    path = str(input('Input path to your file: ').strip())
-    try:
-        with open(path) as f:
-            words = [delete_bad_signes_from_words(word.strip().lower()) for word in f.readlines()]
-            return words
-    except:
-        print('file not found, try again')
-        exit()
-    if len(words) >= 0:
-        return words
-    return []
+def reading_file() -> list:
+    while True:
+        path = sg.popup_get_file('Введите путь к файлу:', no_window=True)
+        if not path:
+            sg.popup('Файл не найден, попробуйте снова')
+            continue
+        try:
+            with open(path, encoding="utf-8") as f:
+                words = [delete_bad_signes_from_words(word.strip().lower()) for word in f.readlines()]
+                return words
+        except FileNotFoundError:
+            sg.popup('Файл не найден, попробуйте снова')
+        except Exception as e:
+            sg.popup(f"Произошла ошибка: {e}")
+            return []
 
-def find_errors(words: list, index: int, inp: str, errors: list) -> None:
+def Input_processing(words: list, index: int, inp: str, errors: list, correct_word_display) -> bool:
     if inp == words[index]:
         engine.say('Правильно!')
-        time.sleep(0.2)
-        engine.runAndWait()
+        correct_word_display.update('Правильно!')  
+    elif inp == 'след':
         return True
-    engine.say('Неправильно!')
-    time.sleep(0.2)
+    elif inp == 'остановить':
+        return False
+    else:
+        engine.say('Неправильно!')
+        errors.append(words[index])
+        correct_word_display.update(f'Неправильно! Верное слово: {words[index]}') 
+    
     engine.runAndWait()
-    errors.append(words[index])
-    return False
+    return True
 
 def main():
     errors = []
     words = reading_file()
+    if not words:
+        sg.popup("Нет слов для обработки.")
+        return
+
+    layout = [
+        [sg.Text('Введите слово (Команды: след - пропустить слово, остановить - выход):', justification='center')],
+        [sg.Input(key='-INP-', justification='center')],
+        [sg.Button('Проверить', bind_return_key=True), sg.Button('Выход')],
+        [sg.Text('Результат:', justification='center')],
+        [sg.Text('', key='-WORD-', size=(40, 1), justification='center', text_color='Black')],
+        [sg.Text('', key='-ERRORS-', size=(40, 10), justification='center')]
+    ]
+    
+    layout = [[sg.Column(layout, element_justification='center', vertical_alignment='center')]]
+    
+    window = sg.Window('Проверка слов', layout, location=(None, None), finalize=True, resizable=True)
+    window['-INP-'].set_focus() 
+    
     while True:
-        word_index = rn.randint(0, len(words))
-        print(words[word_index])
+        word_index = random.randint(0, len(words) - 1)
         engine.say(words[word_index])
         engine.runAndWait()
-        time.sleep(0.2)
-        print('Comands: след - пропустить слово, остановить - выход')
-        inp = input('Введите слово: ').strip().lower()
-        find_errors(words, word_index, inp, errors)
+        
+        event, values = window.read()
 
-main()
+        if event == sg.WIN_CLOSED or event == 'Выход':
+            break
+        
+        inp = values['-INP-'].strip().lower()
+        
+        if not Input_processing(words, word_index, inp, errors, window['-WORD-']):
+            break
+        
+        window['-INP-'].update('')
+        window['-ERRORS-'].update("\n".join(errors)) 
+        window.refresh()  
 
+    window.close()
 
-
-
-
-
-
-
+if __name__ == "__main__":
+    main()
