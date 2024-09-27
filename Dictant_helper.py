@@ -2,7 +2,6 @@ import pyttsx3
 import time
 
 path = str(input('Input path to your file: ').strip())
-type_of_spliter = str(input('Type of spliter: ').strip())
 
 try:
     with open(fr'path', encoding='utf-8') as file:
@@ -10,7 +9,7 @@ try:
         lst = [line.strip() for line in file if line != ' ']
         for i in range(len(lst)):
             if len(lst[i]) > 1:
-                for i in lst[i].replace("'", '').strip().split(type_of_spliter):
+                for i in lst[i].replace("'", '').strip().split():
                     words.append(i)
 except:
     print('file not found, try again')
