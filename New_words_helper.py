@@ -3,10 +3,11 @@ import PySimpleGUI as sg
 import random
 import re
 
+
 engine = pyttsx3.init()
 
 def delete_bad_signes_from_words(word: str) -> str:
-    return re.sub(r'[^\w\s]', '', word)
+    return re.sub(fr'!"#$%&()*+,-./:;<=>?@[\]^_`|~', '', word)
 
 def reading_file() -> list:
     while True:
