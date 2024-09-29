@@ -1,13 +1,14 @@
 import pyttsx3
 import PySimpleGUI as sg
 import random
-import re
 
 
 engine = pyttsx3.init()
 
 def delete_bad_signes_from_words(word: str) -> str:
-    return re.sub(fr'!"#$%&()*+,-./:;<]^_`|~', '', word)
+    for i in '!"#$%&()*+,-./:;<]^_`|~':
+        word = word.replace(i, '')
+    return word
 
 def reading_file() -> list:
     while True:

@@ -1,11 +1,12 @@
 import pyttsx3
-import time
 from PySimpleGUI import popup_get_file
 import PySimpleGUI as sg
-import re
+from random import randint
 
 def delete_bad_signes_from_words(word: str) -> str:
-    return re.sub(fr'!"#$%&()*+,-./:;<]^_`|~', '', word)
+    for i in '!"#$%&()*+,-./:;<]^_`|~':
+        word = word.replace(i, '')
+    return word
 
 while True:
     path = sg.popup_get_file('Введите путь к файлу:', no_window=True)
@@ -16,6 +17,8 @@ while True:
         with open(path, encoding="utf-8") as f:
             content = []
             for line in f:
+                if line == ' ':
+                    continue
                 if len(line.split()) > 1:
                     for word in line.split():
                         content.append(delete_bad_signes_from_words(word.lower()))
@@ -33,17 +36,18 @@ words = content
 errors = []
 engine = pyttsx3.init()
 for i in range(len(words)):
+    i = randint(0, len(words) - 1)
+    left = len(words) - i
     engine.say(words[i])
     engine.runAndWait()
-    time.sleep(2)
-    inp = str(input()).strip()
+    print(f'Words: {len(words)} words left: {left}')
+    inp = str(input("Введите слово: ")).strip()
     if inp == words[i]:
         print('Correct!')
     elif inp == 'след':
         continue
     else:
         engine.say('Неправильно!')
-        time.sleep(1)
         engine.runAndWait()
         print('Incorrect!')
         print(f'The correct word is: {words[i].strip()}')
