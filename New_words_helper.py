@@ -25,13 +25,13 @@ def reading_file() -> list:
                     else:
                         content.append(delete_bad_signes_from_words(line.lower()))
 
-                return content
+                return content, path
         except FileNotFoundError:
             sg.popup('Файл не найден, попробуйте снова')
         except Exception as e:
             print(e)
             sg.popup(f"Произошла ошибка: {e}")
-            return []
+            return [],path
 
 def Input_processing(words: list, index: int, inp: str, errors: list, correct_word_display) -> bool:
     if inp == words[index]:
@@ -51,7 +51,7 @@ def Input_processing(words: list, index: int, inp: str, errors: list, correct_wo
 
 def main():
     errors = []
-    words = reading_file()
+    words, path = reading_file()
     if not words:
         sg.popup("Нет слов для обработки.")
         return
@@ -62,7 +62,9 @@ def main():
         [sg.Button('Проверить', bind_return_key=True), sg.Button('Выход')],
         [sg.Text('Результат:', justification='center')],
         [sg.Text('', key='-WORD-', size=(40, 1), justification='center', text_color='Black')],
-        [sg.Text('', key='-ERRORS-', size=(40, 10), justification='center')]
+        [sg.Text('', key='-ERRORS-', size=(40, 10), justification='center')],
+        [sg.Text(f'Всего слов: {len(words)}', key='-LEN-', size=(20, 1), justification='center')],
+        [sg.Text('Пройдено: ', key='-WORDS_PASSED-', size=(20, 1), justification='down')]
     ]
     
     layout = [[sg.Column(layout, element_justification='center', vertical_alignment='center')]]
@@ -71,7 +73,9 @@ def main():
     window['-INP-'].set_focus() 
     
     while True:
+        count = 0
         word_index = random.randint(0, len(words) - 1)
+        count += 1
         engine.say(words[word_index])
         engine.runAndWait()
         
@@ -87,8 +91,12 @@ def main():
         
         window['-INP-'].update('')
         window['-ERRORS-'].update("\n".join(errors)) 
-        window.refresh()  
+        window['-WORDS_PASSED-'].update(f'Пройдено: {count}')
 
+        window.refresh()  
+        if count == len(words):
+            with open(path,'w+') as errors:
+                errors.write("\n".join(errors))
     window.close()
 
 if __name__ == "__main__":

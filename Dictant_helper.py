@@ -1,19 +1,35 @@
 import pyttsx3
 import time
+from PySimpleGUI import popup_get_file
+import PySimpleGUI as sg
+import re
 
-path = str(input('Input path to your file: ').strip())
+def delete_bad_signes_from_words(word: str) -> str:
+    return re.sub(fr'!"#$%&()*+,-./:;<]^_`|~', '', word)
 
-try:
-    with open(fr'path', encoding='utf-8') as file:
-        words = []
-        lst = [line.strip() for line in file if line != ' ']
-        for i in range(len(lst)):
-            if len(lst[i]) > 1:
-                for i in lst[i].replace("'", '').strip().split():
-                    words.append(i)
-except:
-    print('file not found, try again')
-    exit()
+while True:
+    path = sg.popup_get_file('Введите путь к файлу:', no_window=True)
+    if not path:
+        sg.popup('Файл не найден, попробуйте снова')
+        continue
+    try:
+        with open(path, encoding="utf-8") as f:
+            content = []
+            for line in f:
+                if len(line.split()) > 1:
+                    for word in line.split():
+                        content.append(delete_bad_signes_from_words(word.lower()))
+
+                else:
+                    content.append(delete_bad_signes_from_words(line.lower()))
+        break
+    except FileNotFoundError:
+        sg.popup('Файл не найден, попробуйте снова')
+    except Exception as e:
+        print(e)
+        sg.popup(f"Произошла ошибка: {e}")
+
+words = content
 errors = []
 engine = pyttsx3.init()
 for i in range(len(words)):
