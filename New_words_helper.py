@@ -7,7 +7,7 @@ import re
 engine = pyttsx3.init()
 
 def delete_bad_signes_from_words(word: str) -> str:
-    return re.sub(fr'!"#$%&()*+,-./:;<=>?@[\]^_`|~', '', word)
+    return re.sub(fr'!"#$%&()*+,-./:;<]^_`|~', '', word)
 
 def reading_file() -> list:
     while True:
@@ -17,11 +17,19 @@ def reading_file() -> list:
             continue
         try:
             with open(path, encoding="utf-8") as f:
-                words = [delete_bad_signes_from_words(word.strip().lower()) for word in f.readlines()]
-                return words
+                content = []
+                for line in f:
+                    if len(line.split()) > 1:
+                        for word in line.split():
+                            content.append(delete_bad_signes_from_words(word.lower()))
+                    else:
+                        content.append(delete_bad_signes_from_words(line.lower()))
+
+                return content
         except FileNotFoundError:
             sg.popup('Файл не найден, попробуйте снова')
         except Exception as e:
+            print(e)
             sg.popup(f"Произошла ошибка: {e}")
             return []
 
